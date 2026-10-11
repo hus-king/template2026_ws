@@ -1,0 +1,44 @@
+err_max : 0.15
+if_debug : 1
+
+# 摄像头参数配置
+camera_height : 0.0
+camera_offset_body_x : 0.0
+camera_offset_body_y : 0.0
+
+# CheckPoint配置
+num_checkpoints: 8
+circle_times_max: 1
+
+checkpoints:
+  "0":
+    x: 3.3
+    y: 0.0
+
+  "1":
+    x: 3.4
+    y: 2.4
+  
+  "2":
+    x: 0.0
+    y: 2.2
+  
+  "3":
+    x: -3.4
+    y: 2.4
+  
+  "4":
+    x: -3.3
+    y: 0.0
+
+  "5":
+    x: -3.4
+    y: -2.4
+
+  "6":
+    x: 0.0
+    y: -2.2
+
+  "7":
+    x: 3.4
+    y: -2.4

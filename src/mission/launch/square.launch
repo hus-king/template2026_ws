@@ -1,0 +1,4 @@
+<launch>
+  <rosparam command="load" file="$(find mission)/config/square.yaml" />
+  <node pkg="mission" type="square" name="square" output="screen" />
+</launch>

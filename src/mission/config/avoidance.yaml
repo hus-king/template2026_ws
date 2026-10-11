@@ -1,0 +1,26 @@
+# 目标位置 [m]，使用本地 ENU 坐标
+target_x: 1.0
+target_y: 0.0
+
+# 避障外圈、内圈半径 [m]
+R_outside: 1.6
+R_inside: 0.8
+
+# 目标追踪比例系数与速度限幅 [m/s]
+p_xy: 0.5
+vel_track_max: 0.25
+
+# 外圈、内圈避障比例系数
+p_R: 0.6
+p_r: 1.2
+
+# 避障速度与总速度限幅 [m/s]
+vel_collision_max: 0.30
+vel_sp_max: 0.30
+
+# 雷达处理角度范围 [度]，沿用源码默认值
+range_min: 0
+range_max: 359
+
+# 1: 自动切换 OFFBOARD；0: 等待遥控器切换，与 hover/square 配置一致
+if_debug: 1

@@ -1,0 +1,5 @@
+<launch>
+  <!-- avoidance 使用普通 NodeHandle，从公共命名空间读取参数。 -->
+  <rosparam command="load" file="$(find mission)/config/avoidance.yaml" />
+  <node pkg="mission" type="avoidance" name="avoidance" output="screen" />
+</launch>
