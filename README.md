@@ -1,20 +1,20 @@
 # mission 飞行任务
 
-本包提供三个 ROS 1 / MAVROS 飞行任务：定点悬停 `hover`、四点巡航 `square` 和雷达避障 `avoidance`。公共控制函数位于 [template.h](../template/include/template.h)，避障算法位于 [avoidance.h](../template/include/avoidance.h)。
+本包提供三个 ROS 1 / MAVROS 飞行任务：定点悬停 `hover`、四点巡航 `square` 和雷达避障 `avoidance`。公共控制函数位于 [template.h](src/template/include/template.h)，避障算法位于 [avoidance.h](src/template/include/avoidance.h)。
 
 ## 文件与任务
 
 | 任务 | 源码 | 启动文件 | 参数文件 | 执行流程 |
 | --- | --- | --- | --- | --- |
-| hover | [hover.cpp](src/hover.cpp) | [hover.launch](launch/hover.launch) | [hover.yaml](config/hover.yaml) | 起飞 → 悬停 30 秒 → 降落 |
-| square | [square.cpp](src/square.cpp) | [square.launch](launch/square.launch) | [square.yaml](config/square.yaml) | 起飞 → 依次到达四个航点 → 在最后一个航点附近降落 |
-| avoidance | [avoidance.cpp](src/avoidance.cpp) | [avoidance.launch](launch/avoidance.launch) | [avoidance.yaml](config/avoidance.yaml) | 起飞 → 追踪目标并躲避障碍 → 距目标小于 0.3 米时降落 |
+| hover | [hover.cpp](src/mission/src/hover.cpp) | [hover.launch](src/mission/launch/hover.launch) | [hover.yaml](src/mission/config/hover.yaml) | 起飞 → 悬停 30 秒 → 降落 |
+| square | [square.cpp](src/mission/src/square.cpp) | [square.launch](src/mission/launch/square.launch) | [square.yaml](src/mission/config/square.yaml) | 起飞 → 依次到达四个航点 → 在最后一个航点附近降落 |
+| avoidance | [avoidance.cpp](src/mission/src/avoidance.cpp) | [avoidance.launch](src/mission/launch/avoidance.launch) | [avoidance.yaml](src/mission/config/avoidance.yaml) | 起飞 → 追踪目标并躲避障碍 → 距目标小于 0.3 米时降落 |
 
 三个节点均以 20 Hz 发布控制指令。源码启动后会提示 `1 to go on , else to quit`，输入 `1` 继续，其他值退出；随后等待飞控连接，并执行模式切换和解锁逻辑。
 
 ## 编译与启动
 
-在配置好 ROS 1 的飞机或仿真环境中，先准备 [CMakeLists.txt](CMakeLists.txt) 和 [package.xml](package.xml) 中声明的依赖，包括 MAVROS、`template`、`QR_node`、`yolov8_ros_msgs`、`cloud_recognition` 等。当前源码存在下文列出的运行前问题，需要先处理，再编译：
+在配置好 ROS 1 的飞机或仿真环境中，先准备 [CMakeLists.txt](src/mission/CMakeLists.txt) 和 [package.xml](src/mission/package.xml) 中声明的依赖，包括 MAVROS、`template`、`QR_node`、`yolov8_ros_msgs`、`cloud_recognition` 等。当前源码存在下文列出的运行前问题，需要先处理，再编译：
 
 ```bash
 cd ~/template2026_ws
