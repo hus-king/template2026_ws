@@ -11,7 +11,7 @@ from rosgraph_msgs.msg import Log
 from mavros_msgs.srv import SetMode
 p=argparse.ArgumentParser(); p.add_argument('task',choices=['hover','square','avoidance']); p.add_argument('--timeout',type=float,default=100); a=p.parse_args()
 assert os.environ.get('ROS_MASTER_URI')=='http://127.0.0.1:11411'
-root=Path('/home/airhust/template2026_ws'); out=root/'validation'/a.task; out.mkdir(exist_ok=True)
+root=Path(__file__).resolve().parent.parent; out=root/'validation'/a.task; out.mkdir(exist_ok=True)
 ready_deadline=time.monotonic()+30
 while time.monotonic()<ready_deadline:
  try:

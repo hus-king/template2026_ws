@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
 set -e
-cd /home/airhust/template2026_ws
-source tools/env.sh >/dev/null
+source "$(dirname -- "${BASH_SOURCE[0]}")/env.sh" >/dev/null
 gui=false
 case "${1:-}" in --gui) gui=true;; --headless|'') ;; *) echo 'Usage: tools/start_sim.sh [--gui|--headless]'; exit 2;; esac
 if tmux has-session -t template2026_sim 2>/dev/null; then
-  echo 'template2026_sim already exists. Use: bash tools/stop_sim.sh'; exit 1
+  echo 'Simulation already exists. Stop it with: bash tools/stop_sim.sh'; exit 1
 fi
 if [ "$gui" = true ]; then
-  export DISPLAY="${DISPLAY:-:1001}"
-  command -v vglrun >/dev/null
-  if ! timeout 3 xdpyinfo >/dev/null 2>&1; then
-    echo "Cannot access desktop DISPLAY=$DISPLAY. Connect NoMachine first, then retry."
-    exit 1
+  if [ -z "${DISPLAY:-}" ]; then echo 'DISPLAY is unset. Run in a desktop terminal, or use --headless.' >&2; exit 1; fi
+  if command -v xdpyinfo >/dev/null && ! timeout 3 xdpyinfo >/dev/null 2>&1; then
+    echo "Cannot access DISPLAY=$DISPLAY" >&2; exit 1
   fi
 fi
 python3 - <<'PY'
@@ -25,14 +22,13 @@ for kind,ports in [(socket.SOCK_STREAM,[11411,11445,4561]),(socket.SOCK_DGRAM,[1
   except OSError: raise SystemExit('Port already in use: '+str(port))
   finally: sock.close()
 PY
-# Pass the chosen GUI settings explicitly; a pre-existing tmux server can have
-# an older environment than the SSH shell.
-cmd="cd /home/airhust/template2026_ws; source tools/env.sh >/dev/null; export DISPLAY='${DISPLAY:-}' XAUTHORITY='${XAUTHORITY:-$HOME/.Xauthority}'; exec roslaunch -p 11411 simulation/sitl.launch gui:=$gui > validation/runtime/sitl.log 2>&1"
+printf -v cmd '%q ' env "PX4_ROOT=$PX4_ROOT" "PX4_BUILD_DIR=$PX4_BUILD_DIR" \
+  "GAZEBO_GUI_PREFIX=$GAZEBO_GUI_PREFIX" "DISPLAY=${DISPLAY:-}" \
+  "XAUTHORITY=${XAUTHORITY:-$HOME/.Xauthority}" bash "$TEMPLATE_WS/tools/launch_sim.sh" "$gui"
 tmux new-session -d -s template2026_sim -n sitl "$cmd"
-if ! python3 tools/check_ready.py; then
-  tail -40 validation/runtime/sitl.log
-  echo 'Startup failed. Stop this session with: bash tools/stop_sim.sh'
-  exit 1
+if ! python3 "$TEMPLATE_WS/tools/check_ready.py"; then
+  tail -40 "$ROS_HOME/sitl.log"
+  echo 'Startup failed. Stop with: bash tools/stop_sim.sh'; exit 1
 fi
-echo 'Simulation ready. Start a task: bash tools/run_task.sh hover'
-echo 'Log: /home/airhust/template2026_ws/validation/runtime/sitl.log'
+echo 'Simulation ready. Run: bash tools/run_task.sh hover'
+echo "Log: $ROS_HOME/sitl.log"

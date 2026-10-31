@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
-cd /home/airhust/template2026_ws
-source tools/env.sh >/dev/null
+source "$(dirname -- "${BASH_SOURCE[0]}")/env.sh" >/dev/null
+cd "$TEMPLATE_WS"
 case "${1:-}" in hover|square|avoidance) task="$1";; *) echo 'Usage: tools/run_task.sh hover|square|avoidance'; exit 2;; esac
 python3 tools/check_ready.py
 python3 - <<'PY'

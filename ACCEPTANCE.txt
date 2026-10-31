@@ -1,60 +1,10 @@
-Windows PowerShell: connect SSH and forward NoMachine. Keep this terminal open.
-  ssh -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 14000:127.0.0.1:4000 -p 19422 airhust@airhust.cn
-
-NoMachine: protocol NX, host 127.0.0.1, port 14000. Log in to the airhust desktop.
-
-In the SSH terminal (or a terminal on the NoMachine desktop):
-  cd /home/airhust/template2026_ws
-  bash tools/start_sim.sh --gui
-  bash tools/run_task.sh hover
-Enter 1 to start. Any other input cancels. Startup checks connected MAVROS,
-fresh odometry, 720-point scan and a running simulation clock. Task startup
-refuses an armed simulator or an existing setpoint controller.
-
-Stop and restart the simulator before each next task:
-  bash tools/stop_sim.sh
-  bash tools/start_sim.sh --gui
-  bash tools/run_task.sh square
-
-  bash tools/stop_sim.sh
-  bash tools/start_sim.sh --gui
-  bash tools/run_task.sh avoidance
-
-Final cleanup:
-  bash tools/stop_sim.sh
-
-Equivalent direct roslaunch entry points:
-  source tools/env.sh
-  export DISPLAY="${DISPLAY:-:1001}"
-  roslaunch -p 11411 simulation/sitl.launch gui:=true
-The direct simulation entry runs in the foreground. In another SSH terminal:
-  cd /home/airhust/template2026_ws
-  source tools/env.sh
-  roslaunch -p 11411 mission acceptance.launch task:=hover confirmed:=true
-The confirmed:=true argument explicitly starts the task, including its automatic
-OFFBOARD/arming flow. This direct form bypasses the shell confirmation and
-preflight checks, so the run_task.sh form above is the normal acceptance entry.
-For a directly launched simulator, Ctrl+C its foreground terminal to stop.
-
-Files:
-  tools/start_sim.sh       Start a tmux-managed simulator and optional Gazebo GUI
-  tools/run_task.sh        Check readiness and launch one task after confirmation
-  tools/stop_sim.sh        Stop only the template2026_sim tmux-managed simulator
-  tools/check_ready.py    Check live simulation feedback
-  simulation/sitl.launch  PX4 + MAVROS + Gazebo + external vision + optional GUI
-  src/mission/launch/acceptance.launch
-  src/mission/scripts/task_stdin.sh
-  src/mission/scripts/sim_vision_truth.py
-
-Evidence: validation/acceptance/
-  build.log, start_gui.log, sitl_gui.log, mission_smoke.log, smoke_result.json
-The GUI was opened on DISPLAY=:1001. In an SSH shell with no DISPLAY, --gui
-uses :1001. In a NoMachine desktop terminal it uses that terminal's DISPLAY.
-ROS master: 11411. Gazebo master: 11445. PX4 instance: 1. MAVROS target system: 2.
-
-Known limitation from the previous flight checks: the task's landing timer
-exits without confirmed landed/disarmed status. This acceptance setup retains
-the existing flight logic. Obstacle detouring and physical flight are untested.
-Latest entry-point verification: GUI created, vision/odom/scan live, cancel
-path passed, confirmed launch published a valid setpoint; no arming was allowed
-during that smoke check. The simulator was stopped after verification.
+See README.md for startup commands and editable parameters.
+Set PX4_ROOT in tools/local.env to this computer's PX4 checkout.
+The workspace path is detected automatically. For GUI mode, run from a graphical desktop terminal.
+Start: bash tools/start_sim.sh --gui
+Task:  bash tools/run_task.sh hover
+Type 1 to begin. Replace hover with square or avoidance as needed.
+Stop:  bash tools/stop_sim.sh
+Restart the simulator before every next task.
+Launch entries: simulation/sitl.launch and src/mission/launch/acceptance.launch.
+Local logs: validation/runtime/sitl.log and validation/runtime/roslog/.

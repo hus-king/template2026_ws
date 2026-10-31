@@ -13,3 +13,5 @@ devel/
 /install/
 __pycache__/
 *.py[cod]
+
+/tools/local.env
