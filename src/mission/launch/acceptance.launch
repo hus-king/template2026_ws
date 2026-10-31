@@ -1,0 +1,9 @@
+<launch>
+  <arg name="task" default="hover" doc="hover, square, or avoidance"/>
+  <arg name="confirmed" default="false" doc="Explicitly permit mission startup"/>
+  <group if="$(arg confirmed)">
+    <rosparam command="load" file="$(find mission)/config/$(arg task).yaml"/>
+    <node pkg="mission" type="$(arg task)" name="$(arg task)" output="screen"
+          launch-prefix="$(find mission)/scripts/task_stdin.sh"/>
+  </group>
+</launch>

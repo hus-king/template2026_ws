@@ -1,70 +1,33 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(mission)
-
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-
-
 find_package(catkin REQUIRED COMPONENTS
-  dynamic_reconfigure
   roscpp
   rospy
-  QR_node
   std_msgs
   sensor_msgs
   geometry_msgs
-  message_generation
+  mavros_msgs
+  nav_msgs
   tf
-  serial
   actionlib
   move_base_msgs
-  tf2_eigen
-  tf2
-  tf2_ros
-  tf2_sensor_msgs
   image_transport
-  pcl_ros
-  pcl_conversions
+  visualization_msgs
   template
-  yolov8_ros_msgs
-  cloud_recognition
 )
-
-catkin_package(
-)
-
-
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
-)
-
-
-# add_executable(endurance src/endurance.cpp)
-# target_link_libraries(endurance ${catkin_LIBRARIES} )
-
-# add_executable(cross src/cross.cpp)
-# target_link_libraries(cross ${catkin_LIBRARIES} )
-
-# add_executable(circle src/circle.cpp)
-# target_link_libraries(circle ${catkin_LIBRARIES} )
-
-# add_executable(hover src/hover.cpp)
-# target_link_libraries(hover ${catkin_LIBRARIES})
-
+catkin_package(CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs geometry_msgs mavros_msgs nav_msgs tf actionlib move_base_msgs image_transport visualization_msgs template)
+include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(hover src/hover.cpp)
 target_link_libraries(hover ${catkin_LIBRARIES})
-
+add_dependencies(hover ${catkin_EXPORTED_TARGETS})
 add_executable(square src/square.cpp)
 target_link_libraries(square ${catkin_LIBRARIES})
-
+add_dependencies(square ${catkin_EXPORTED_TARGETS})
 add_executable(avoidance src/avoidance.cpp)
 target_link_libraries(avoidance ${catkin_LIBRARIES})
+add_dependencies(avoidance ${catkin_EXPORTED_TARGETS})
+
+catkin_install_python(PROGRAMS scripts/sim_vision_truth.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

@@ -1,0 +1,8 @@
+{
+  "launch_received_confirmation": true,
+  "setpoint_received": true,
+  "coordinate_frame": 1,
+  "type_mask": 3064,
+  "armed_during_smoke": false,
+  "armed_after_smoke": false
+}

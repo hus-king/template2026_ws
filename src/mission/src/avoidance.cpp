@@ -1,6 +1,10 @@
 #include <template.h>
 #include <avoidance.h>
 
+int mission_num = 0;
+float if_debug = 0;
+float err_max = 0.15;
+
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>全 局 变 量<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //--------------------------------------------输入--------------------------------------------------
@@ -213,7 +217,7 @@ int main(int argc, char **argv)
             break;
 
         //避障
-        case 2:
+        case 2: {
             collision_avoidance(target_x,target_y);
 	        setpoint_raw.type_mask = 1 + 2 /* + 4 + 8 + 16 */ + 32 + 64 + 128 + 256 + 512 /*+ 1024 */+ 2048; // xy速度控制，z位置控制
             setpoint_raw.coordinate_frame = 1;
@@ -229,6 +233,8 @@ int main(int argc, char **argv)
                 last_request = ros::Time::now();
             }
             break;
+
+        }
 
         //降落
             case 3:

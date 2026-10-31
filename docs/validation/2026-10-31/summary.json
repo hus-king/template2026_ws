@@ -1,0 +1,32 @@
+{
+  "server": "airhust3 / 192.168.1.194",
+  "workspace": "/home/airhust/template2026_ws",
+  "base_commit": "fa41678c22d23d453ac5c476e4511b1dfedba1f3",
+  "build": "passed_all_four_targets",
+  "flight_flow": [
+    {
+      "task": "hover",
+      "node_exit": 0,
+      "offboard_armed": true,
+      "landed_and_disarmed": false,
+      "setpoint_hz": 19.999227083011284
+    },
+    {
+      "task": "square",
+      "node_exit": 0,
+      "offboard_armed": true,
+      "landed_and_disarmed": false,
+      "setpoint_hz": 19.998089366004134
+    },
+    {
+      "task": "avoidance",
+      "node_exit": 0,
+      "offboard_armed": true,
+      "landed_and_disarmed": false,
+      "setpoint_hz": 19.998458692971642
+    }
+  ],
+  "obstacle_test": "not_run",
+  "physical_validation": "not_run",
+  "simulation_stopped": true
+}

@@ -1,4 +1,4 @@
-# mission 飞行任务
+# template2026_ws：ROS 1 / PX4 仿真任务
 
 本包提供三个 ROS 1 / MAVROS 飞行任务：定点悬停 `hover`、四点巡航 `square` 和雷达避障 `avoidance`。公共控制函数位于 [template.h](src/template/include/template.h)，避障算法位于 [avoidance.h](src/template/include/avoidance.h)。
 
@@ -12,33 +12,144 @@
 
 三个节点均以 20 Hz 发布控制指令。源码启动后会提示 `1 to go on , else to quit`，输入 `1` 继续，其他值退出；随后等待飞控连接，并执行模式切换和解锁逻辑。
 
-## 编译与启动
+## 仿真可用状态
 
-在配置好 ROS 1 的飞机或仿真环境中，先准备 [CMakeLists.txt](src/mission/CMakeLists.txt) 和 [package.xml](src/mission/package.xml) 中声明的依赖，包括 MAVROS、`template`、`QR_node`、`yolov8_ros_msgs`、`cloud_recognition` 等。当前源码存在下文列出的运行前问题，需要先处理，再编译：
+194 服务器上的仿真环境已可用，已完成 ROS 编译、Gazebo 图形界面启动及三个任务的空场仿真运行。使用下方脚本即可启动验收。
 
-```bash
-cd ~/template2026_ws
-catkin_make
-source devel/setup.bash
+| 检查项 | 实际结果 |
+| --- | --- |
+| 编译 | `template`、`hover`、`square`、`avoidance` 四个目标编译通过 |
+| Gazebo / MAVROS | 图形界面可打开，飞控连接、里程计和 720 点激光扫描正常 |
+| hover | 进入 OFFBOARD、解锁起飞，完成约 30 秒悬停 |
+| square | 依次到达四个航点，记录到的最近三维位置误差均小于 0.08 m |
+| avoidance | 空场中运行到目标附近并进入降落阶段，尚未验证障碍绕行 |
+| 降落闭环 | 未通过：任务按计时退出后，飞控仍未确认落地并上锁 |
+| 实机飞行 | 未测试 |
+
+仿真启动和任务运行已验证，完整降落流程仍有待修复。测试结果保存在 [docs/validation/2026-10-31](docs/validation/2026-10-31/)。
+
+## 在 194 上启动
+
+### 1. SSH 连接并建立远程桌面隧道
+
+在 Windows PowerShell 中执行，连接后保持终端开启：
+
+```powershell
+ssh -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 14000:127.0.0.1:4000 -p 19422 airhust@airhust.cn
 ```
 
-先启动 MAVROS 和本地定位；`avoidance` 还需要雷达驱动发布 `/scan`。这些任务 launch 只启动任务节点，不启动飞控连接、定位或雷达。
+打开 NoMachine，协议选择 **NX**，主机填写 `127.0.0.1`，端口填写 `14000`，登录 `airhust` 桌面。
 
-每次选择一个任务运行：
+### 2. 启动仿真和 Gazebo 画面
 
-```bash
-roslaunch mission hover.launch
-```
+在 SSH 终端执行：
 
 ```bash
-roslaunch mission square.launch
+cd /home/airhust/template2026_ws
+bash tools/start_sim.sh --gui
 ```
+
+脚本等待 MAVROS 连接、有效里程计、720 点激光扫描和运行中的仿真时钟。出现 `Simulation ready` 后再启动任务。
+
+`--gui` 使用当前终端的 `DISPLAY`；SSH 中没有 `DISPLAY` 时，默认使用已验证的 NoMachine 桌面 `:1001`。只需要后台仿真时可以使用 `--headless`。
+
+### 3. 选择一个任务运行
+
+悬停：
 
 ```bash
-roslaunch mission avoidance.launch
+bash tools/run_task.sh hover
 ```
 
-三个任务使用同一个飞控控制话题，应单独运行。修改 YAML 后重新启动任务即可加载新值；修改 C++ 后需要重新编译。
+出现提示后输入 **`1`** 开始，其他输入取消。随后程序自动请求 OFFBOARD 和解锁，在 Gazebo 中观察起飞、悬停和降落阶段。
+
+每次换任务前先停止并重启仿真。例如验收四点巡航：
+
+```bash
+bash tools/stop_sim.sh
+bash tools/start_sim.sh --gui
+bash tools/run_task.sh square
+```
+
+空场目标追踪测试：
+
+```bash
+bash tools/stop_sim.sh
+bash tools/start_sim.sh --gui
+bash tools/run_task.sh avoidance
+```
+
+三个任务共用 `/mavros/setpoint_raw/local`，每次只运行一个。启动脚本发现已有控制节点或飞控仍处于解锁状态时会拒绝启动新任务。
+
+### 4. 停止仿真
+
+```bash
+bash tools/stop_sim.sh
+```
+
+脚本关闭本工作空间的 `template2026_sim` 会话。每次任务运行后重新启动仿真，可清除上次任务的飞控状态和模型位置。
+
+## 编译与环境
+
+当前验证环境为 Ubuntu 20.04.6、ROS Noetic、Gazebo 11.15.1；服务器已准备好 MAVROS、PX4 SITL 和 VirtualGL。需要重新编译时执行：
+
+```bash
+cd /home/airhust/template2026_ws
+source /opt/ros/noetic/setup.bash
+catkin_make -j4
+```
+
+当前仿真脚本按 194 的目录配置：
+
+- 本工作空间：`/home/airhust/template2026_ws`
+- 已有 PX4：`/home/husking/PX4-Autopilot`，提交 `79c55614d860d2f3e8ce775741dd96ef062c998f`
+- PX4 构建目录：`/home/husking/PX4-Autopilot/build/px4_sitl_default`
+
+在其他机器部署时，需要先准备相同的 ROS/PX4/Gazebo 依赖，并调整 [tools/env.sh](tools/env.sh)、启动脚本和 launch 中的路径；当前版本未提供通用的一键安装脚本。
+
+## sh 与 launch 入口
+
+| 文件 | 用途 |
+| --- | --- |
+| [start_sim.sh](tools/start_sim.sh) | 启动独立仿真，可选择 Gazebo 图形界面，等待反馈就绪 |
+| [run_task.sh](tools/run_task.sh) | 检查飞控和控制话题，输入 `1` 后通过 launch 启动任务 |
+| [stop_sim.sh](tools/stop_sim.sh) | 停止本工作空间的仿真会话 |
+| [sitl.launch](simulation/sitl.launch) | 启动 PX4、MAVROS、Gazebo、模拟视觉定位及可选 GUI |
+| [acceptance.launch](src/mission/launch/acceptance.launch) | 按 `task` 参数选择任务，并向原程序提供启动输入 |
+| [check_ready.py](tools/check_ready.py) | 检查飞控连接、里程计、扫描数据和仿真时钟 |
+
+需要直接使用 launch 时，先在一个终端启动仿真：
+
+```bash
+cd /home/airhust/template2026_ws
+source tools/env.sh
+export DISPLAY="${DISPLAY:-:1001}"
+roslaunch -p 11411 simulation/sitl.launch gui:=true
+```
+
+在另一个 SSH 终端启动任务：
+
+```bash
+cd /home/airhust/template2026_ws
+source tools/env.sh
+roslaunch -p 11411 mission acceptance.launch task:=hover confirmed:=true
+```
+
+`task` 可以是 `hover`、`square`、`avoidance`。`confirmed:=true` 代表明确启动任务，会直接进入程序的 OFFBOARD/解锁流程；普通验收推荐使用带就绪检查和输入确认的 `run_task.sh`。直接运行仿真 launch 时，在它的终端按 `Ctrl+C` 停止。
+
+## 仿真数据链路
+
+```text
+Gazebo 模型真值 → MAVROS vision_pose → PX4 EKF
+  → MAVROS local_position/odom → 任务节点
+  → MAVROS setpoint_raw/local → PX4 → Gazebo
+```
+
+当前空场景为 [empty.world](simulation/empty.world)。本地仿真机型关闭了未使用的相机/Livox，加入 20 Hz、720 点、0.5 度间隔的二维激光扫描，以匹配现有避障代码。模拟定位来自 Gazebo 真值，真实环境中的定位误差和遮挡不在本次验证范围内。
+
+仿真使用独立接口：ROS master `11411`、Gazebo master `11445`、PX4 实例 `1`、MAVLink system ID `2`，MAVROS UDP `14541` 对接 PX4 `14581`。
+
+本机完整运行日志保存在 `validation/`，该目录不提交到 Git；仓库只保留小体积结果摘要。启动日志为 `validation/runtime/sitl.log`，任务 ROS 日志为 `validation/runtime/roslog/`。
 
 ## hover 配置
 
@@ -130,10 +241,14 @@ waypoints:
 | `mavros/set_mode` | 请求 OFFBOARD 模式 |
 | `mavros/cmd/arming` | 请求解锁 |
 
-## 当前运行前问题与验证范围
+## 本版修复与剩余问题
 
-- `hover.launch` 当前节点 `name` 为空，且 YAML 放在节点内部加载到私有命名空间；源码使用普通 `NodeHandle` 读取公共参数。需要设置有效节点名，并将 YAML 加载范围与源码一致。square 和 avoidance 的 launch 已采用公共参数加载。
-- `avoidance.cpp` 当前缺少 `mission_num`、`if_debug`、`err_max` 的定义；`case 2` 中局部变量 `abs_distance` 的初始化还需要用独立作用域包住，避免后续 `case` 标签跨越初始化。这些问题会影响编译。
-- 公共 `precision_land()` 保持进入降落时的 XY，设置本地 Z 目标为 `-0.15`，约 5 秒后返回完成；它没有依据落地状态确认着陆，也没有主动发送上锁请求。
+已修复影响编译和启动的问题：清理未使用的 `QR_node`、`yolov8_ros_msgs`、`cloud_recognition` 等依赖，补齐实际消息依赖；移除缺少源码的 `test_servo` 编译目标；补齐 `avoidance.cpp` 的变量及 `case 2` 作用域；修正 hover/template 的节点名和 YAML 参数加载范围。
 
-本文按当前源码和配置编写。已对 square 的参数对应关系及 square、avoidance 的 launch/YAML 做静态检查；尚未进行 ROS 编译、仿真或实机飞行验证。
+公共控制函数和原任务状态机保留。当前仍有以下限制：
+
+- `precision_land()` 将本地 Z 目标设为 `-0.15`，约 5 秒后按计时返回完成，没有检查落地状态，也没有主动发送上锁请求。本次三个任务接触地面后，PX4 仍报告解锁/未落地；节点退出后出现 OFFBOARD 丢失、无效设定值及失控保护告警，因此降落闭环不能判为通过。
+- 降落时的掩码 `960` 仍启用速度字段，avoidance 进入降落时会保留上一阶段的 XY 速度。
+- 当前只验证空场中的目标追踪，未验证有障碍物时的绕行和碰撞情况。激光代码依赖 720 点扫描格式。
+- square 飞过三个边后在航点 3 附近降落，没有返回航点 0 的闭合段。
+- 仿真可用不代表已完成实机验证。

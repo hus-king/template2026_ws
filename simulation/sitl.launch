@@ -1,0 +1,21 @@
+<launch>
+  <arg name="gui" default="false"/>
+  <arg name="workspace" default="/home/airhust/template2026_ws"/>
+  <arg name="px4_root" default="/home/husking/PX4-Autopilot"/>
+  <param name="use_sim_time" value="true"/>
+  <env name="PX4_SIM_MODEL" value="iris"/>
+  <node name="sitl_1" pkg="px4" type="px4" output="screen"
+        args="$(arg px4_root)/build/px4_sitl_default/etc -s $(arg workspace)/simulation/rcS -i 1"/>
+  <include file="$(find mavros)/launch/px4.launch">
+    <arg name="fcu_url" value="udp://:14541@127.0.0.1:14581"/>
+    <arg name="gcs_url" value=""/>
+    <arg name="tgt_system" value="2"/>
+  </include>
+  <node name="gazebo" pkg="gazebo_ros" type="gzserver" output="screen" required="true"
+        args="-e ode $(arg workspace)/simulation/empty.world"/>
+  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" output="screen"
+        args="-sdf -file $(arg workspace)/simulation/iris.sdf -model iris -x 0 -y 0 -z 0.2"/>
+  <node name="template_sim_vision" pkg="mission" type="sim_vision_truth.py" output="screen" required="true"/>
+  <node if="$(arg gui)" name="gazebo_gui" pkg="gazebo_ros" type="gzclient"
+        launch-prefix="vglrun -d egl0 -fps 30" output="screen"/>
+</launch>

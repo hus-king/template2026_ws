@@ -1,0 +1,102 @@
+{
+  "task": "square",
+  "exit_code": 0,
+  "timed_out": false,
+  "initial": {
+    "state": {
+      "connected": true,
+      "armed": false,
+      "mode": "CMODE(50593792)"
+    },
+    "truth": [
+      4.508397486194192e-09,
+      5.754670803713265e-09,
+      0.05400004331095681
+    ],
+    "scan_min": null,
+    "odom": [
+      0.0012623976217582822,
+      0.0013327336637303233,
+      0.049325037747621536
+    ],
+    "landed_state": 1
+  },
+  "final": {
+    "state": {
+      "connected": true,
+      "armed": true,
+      "mode": "POSCTL"
+    },
+    "truth": [
+      0.04509329596281581,
+      1.0562344701124473,
+      0.05806788255400617
+    ],
+    "scan_min": 13.251416206359863,
+    "odom": [
+      0.03900948539376259,
+      1.049778938293457,
+      0.0484582893550396
+    ],
+    "landed_state": 2,
+    "setpoint": {
+      "position": [
+        0.11888540536165237,
+        1.0505281686782837,
+        -0.15
+      ],
+      "velocity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mask": 960
+    }
+  },
+  "stages": [
+    {
+      "stage": 1,
+      "t": 16.736
+    },
+    {
+      "stage": 2,
+      "t": 18.688
+    },
+    {
+      "stage": 3,
+      "t": 18.736
+    },
+    {
+      "stage": 4,
+      "t": 20.736
+    },
+    {
+      "stage": 5,
+      "t": 22.736
+    },
+    {
+      "stage": 6,
+      "t": 24.788
+    }
+  ],
+  "scan_lengths": [
+    720
+  ],
+  "setpoint_publishers": [
+    "/square"
+  ],
+  "setpoint_count": 551,
+  "setpoint_hz": 19.998089366004134,
+  "max_truth_z": 1.4550528483414333,
+  "observed_offboard_armed": true,
+  "landed_and_disarmed": false,
+  "collision_test": "not_run_empty_world",
+  "localization_source": "Gazebo ground truth -> MAVROS vision_pose -> PX4 EKF -> MAVROS local odometry",
+  "waypoint_min_errors_m": [
+    0.06616700204230391,
+    0.03079311609650541,
+    0.00835871775837794,
+    0.07288192627551257
+  ],
+  "telemetry_clock": "wall"
+}

@@ -1,0 +1,84 @@
+{
+  "task": "avoidance",
+  "exit_code": 0,
+  "timed_out": false,
+  "initial": {
+    "state": {
+      "connected": true,
+      "armed": false,
+      "mode": "CMODE(50593792)"
+    },
+    "truth": [
+      4.5217902402111074e-09,
+      5.770122300752776e-09,
+      0.05400004343410401
+    ],
+    "scan_min": null,
+    "odom": [
+      0.001109891920350492,
+      0.0011535922531038523,
+      0.0494975745677948
+    ],
+    "landed_state": 1
+  },
+  "final": {
+    "state": {
+      "connected": true,
+      "armed": true,
+      "mode": "POSCTL"
+    },
+    "truth": [
+      0.8872581132457438,
+      -0.041640560920982554,
+      0.054879087449370825
+    ],
+    "scan_min": null,
+    "odom": [
+      0.8834953904151917,
+      -0.04114223271608353,
+      0.05294319614768028
+    ],
+    "landed_state": 2,
+    "setpoint": {
+      "position": [
+        0.7250394225120544,
+        -0.08207051455974579,
+        -0.15
+      ],
+      "velocity": [
+        0.1424899399280548,
+        0.041584666818380356,
+        0.0
+      ],
+      "mask": 960
+    }
+  },
+  "stages": [
+    {
+      "stage": 1,
+      "t": 17.084
+    },
+    {
+      "stage": 2,
+      "t": 18.684
+    },
+    {
+      "stage": 3,
+      "t": 23.232
+    }
+  ],
+  "scan_lengths": [
+    720
+  ],
+  "setpoint_publishers": [
+    "/avoidance"
+  ],
+  "setpoint_count": 520,
+  "setpoint_hz": 19.998458692971642,
+  "max_truth_z": 1.4030749933420936,
+  "observed_offboard_armed": true,
+  "landed_and_disarmed": false,
+  "collision_test": "not_run_empty_world",
+  "localization_source": "Gazebo ground truth -> MAVROS vision_pose -> PX4 EKF -> MAVROS local odometry",
+  "telemetry_clock": "simulated"
+}
