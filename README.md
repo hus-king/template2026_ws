@@ -233,3 +233,24 @@ bash tools/run_hardware.sh hover
 修改 YAML 后重启任务；修改头文件或 C++ 后，先停止任务，再执行 `source /opt/ros/noetic/setup.bash && catkin_make -j2`。
 
 归档时发现现有可执行文件早于本次高度修改，因此当前进程不会自动采用 `0.8 m`。本次只保存版本，没有重编译或重启运行中的程序。隔离测试结果对应当时的二进制，参数改动后尚未重新完成任务测试。版本参数见 [HARDWARE_VERSION.json](HARDWARE_VERSION.json)。
+
+## 实机 shell 启动（新增）
+
+```bash
+cd ~/template2026_ws
+bash tools/start_hardware.sh hover
+# 四点巡航：bash tools/start_hardware.sh square
+# 雷达避障：bash tools/start_hardware.sh avoidance
+```
+
+脚本打开 tmux 的 `sensors`、`task` 窗口；avoidance 缺少 `/scan` 时还会打开 `scan` 窗口。已有驱动/定位或扫描时复用，已有任务时拒绝重复启动。
+
+任务命令预填在 `task` 窗口，**由操作者按回车执行，再输入 `1` 确认**，仍需手动切 OFFBOARD。
+
+`Ctrl+B` 然后按 `D` 退出画面但保留程序；重新进入：
+
+```bash
+tmux attach -t template2026_hardware
+```
+
+`Ctrl+B` 然后按 `W` 选择窗口；在对应窗口按 `Ctrl+C` 停止程序。启动命令后加 `--no-attach` 可只创建窗口。
