@@ -1,0 +1,10 @@
+<launch>
+  <arg name="cloud_topic" default="/cloud_registered_body"/>
+  <arg name="output_topic" default="/scan"/>
+  <node pkg="nodelet" type="nodelet" name="mid360_scan_converter" output="screen"
+        args="standalone pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet">
+    <rosparam command="load" file="$(find mission)/config/mid360_scan.yaml"/>
+    <remap from="cloud_in" to="$(arg cloud_topic)"/>
+    <remap from="scan" to="$(arg output_topic)"/>
+  </node>
+</launch>

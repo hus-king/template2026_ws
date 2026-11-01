@@ -1,0 +1,22 @@
+实机版 hardware-2026-11-01
+
+终端 1：
+  cd ~/template2026_ws
+  source tools/env_hardware.sh
+  roslaunch fly_demo utils.launch
+
+终端 2（avoidance 需要）：
+  cd ~/template2026_ws
+  source tools/env_hardware.sh
+  roslaunch mission mid360_scan.launch cloud_topic:=/cloud_registered
+
+终端 3：
+  cd ~/template2026_ws
+  bash tools/run_hardware.sh hover
+  # hover 可替换为 square / avoidance
+
+输入 1 后启动任务，默认需手动切 OFFBOARD；进入后程序会请求解锁。
+当前源码高度为 0.8 m，square 边长 0.5 m，avoidance 目标 (2.5,0)。
+修改 YAML 后重启任务；修改头文件/C++ 后停止任务再 catkin_make -j2。
+当前可执行文件早于高度修改，本次未重编译或重启运行程序。
+实飞、真实绕障尚未完成验收，降落确认上锁问题仍保留。

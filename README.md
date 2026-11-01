@@ -184,3 +184,52 @@ bash tools/run_task.sh square
 修改 YAML 后重启任务；修改 C++/头文件后重新 `catkin_make -j4`。工作空间路径自动识别。
 
 PX4 已验证提交：`79c55614d860d2f3e8ce775741dd96ef062c998f`；其他版本未验证。远程桌面需要 VirtualGL 时，在 `tools/local.env` 中设置 `GAZEBO_GUI_PREFIX="vglrun -d egl0 -fps 30"`。
+
+## 实机版（新增）
+
+版本：`hardware-2026-11-01`。当前实机源码与参数已归档；已完成编译检查、隔离假反馈任务测试和真实点云转扫描验证，尚未完成实飞/绕障验收，降落确认上锁问题仍保留。
+
+### 启动
+
+实机需已有 MAVROS、Livox 驱动、FAST-LIO 和 `fly_demo/utils.launch`；点云转换需 `pointcloud_to_laserscan`。
+
+终端 1：
+
+```bash
+cd ~/template2026_ws
+source tools/env_hardware.sh
+roslaunch fly_demo utils.launch
+```
+
+终端 2（avoidance 需要）：
+
+```bash
+cd ~/template2026_ws
+source tools/env_hardware.sh
+roslaunch mission mid360_scan.launch cloud_topic:=/cloud_registered
+```
+
+终端 3：
+
+```bash
+cd ~/template2026_ws
+bash tools/run_hardware.sh hover
+# 换任务时使用 square 或 avoidance
+```
+
+输入 `1` 启动任务，默认手动切 OFFBOARD；切入后程序会请求解锁。实机入口使用 ROS 端口 `11311`，不会启动 PX4 SITL、Gazebo 或仿真真值定位。
+
+### 当前参数与修改位置
+
+| 文件 | 当前参数 |
+| --- | --- |
+| `src/template/include/template.h` | `ALTITUDE=0.8f`、`AIM_ALTITUDE=0.8f`，用于 hover/avoidance 等公共函数 |
+| `src/mission/config/square.yaml` | 高度 `0.8 m`；航点 `(0,0) → (0.5,0) → (0.5,0.5) → (0,0.5)` |
+| `src/mission/config/avoidance.yaml` | 目标本地坐标 `(2.5,0)`；外圈 `1.6 m`、内圈 `0.8 m` |
+| `src/mission/config/mid360_scan.yaml` | 转到 `body` 坐标系，720 点；高度筛选 `[-0.15,0.30] m` |
+| `src/mission/launch/hardware.launch` | 实机入口覆盖 `if_debug=0`，不受任务 YAML 中 `if_debug=1` 影响 |
+| `tools/env_hardware.sh` | ROS 环境和本机已有驱动工作空间路径 |
+
+修改 YAML 后重启任务；修改头文件或 C++ 后，先停止任务，再执行 `source /opt/ros/noetic/setup.bash && catkin_make -j2`。
+
+归档时发现现有可执行文件早于本次高度修改，因此当前进程不会自动采用 `0.8 m`。本次只保存版本，没有重编译或重启运行中的程序。隔离测试结果对应当时的二进制，参数改动后尚未重新完成任务测试。版本参数见 [HARDWARE_VERSION.json](HARDWARE_VERSION.json)。

@@ -1,0 +1,99 @@
+{
+  "version": "hardware-2026-11-01",
+  "edition": "hardware_configuration",
+  "date": "2026-11-01",
+  "source_base_commit": "a2e17891bf9c423282542156a4579c587270c87e",
+  "altitude_macros_m": {
+    "ALTITUDE": 0.8,
+    "AIM_ALTITUDE": 0.8
+  },
+  "parameters": {
+    "hover": {
+      "err_max": 0.15,
+      "if_debug": 1
+    },
+    "square": {
+      "err_max": 0.15,
+      "if_debug": 1,
+      "altitude": 0.8,
+      "waypoints": {
+        "0": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "1": {
+          "x": 0.5,
+          "y": 0.0
+        },
+        "2": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "3": {
+          "x": 0.0,
+          "y": 0.5
+        }
+      }
+    },
+    "avoidance": {
+      "target_x": 2.5,
+      "target_y": 0.0,
+      "R_outside": 1.6,
+      "R_inside": 0.8,
+      "p_xy": 0.5,
+      "vel_track_max": 0.25,
+      "p_R": 0.6,
+      "p_r": 1.2,
+      "vel_collision_max": 0.3,
+      "vel_sp_max": 0.3,
+      "range_min": 0,
+      "range_max": 359,
+      "if_debug": 1
+    },
+    "mid360_scan": {
+      "target_frame": "body",
+      "transform_tolerance": 0.05,
+      "min_height": -0.15,
+      "max_height": 0.3,
+      "angle_min": -3.141592653589793,
+      "angle_max": 3.141592653589793,
+      "angle_increment": 0.008726646259971648,
+      "scan_time": 0.1,
+      "range_min": 0.25,
+      "range_max": 15.0,
+      "use_inf": true,
+      "inf_epsilon": 1.0,
+      "concurrency_level": 1
+    }
+  },
+  "hardware_entry": {
+    "script": "tools/run_hardware.sh",
+    "launch": "src/mission/launch/hardware.launch",
+    "if_debug_override": 0,
+    "ros_master_port": 11311,
+    "arming_behavior": "Manual OFFBOARD is required; controller can then request arming."
+  },
+  "scan_entry": {
+    "launch": "src/mission/launch/mid360_scan.launch",
+    "default_input": "/cloud_registered_body",
+    "verified_alternative_input": "/cloud_registered",
+    "output": "/scan",
+    "target_frame": "body",
+    "points": 720
+  },
+  "validation": {
+    "source_compiled_before_local_altitude_change": true,
+    "current_altitude_source_rebuild_pending": true,
+    "isolated_mock_task_checks": "passed before local parameter edits; not physical flight",
+    "scan_conversion_from_real_cloud": "720 points, approximately 10 Hz",
+    "agent_physical_flight_validation": "not_performed",
+    "landing_confirmation": "unresolved"
+  },
+  "parameter_file_sha256": {
+    "src/template/include/template.h": "cc11d3852d27750388710a28ff591487e8919d7efad45a24d3fa423a196c1e7b",
+    "src/mission/config/hover.yaml": "357a80959c714d6016aaf55d680ef530337bd896f0a648882ed3f1cbd9d78177",
+    "src/mission/config/square.yaml": "393e74f18ad2a5ed95a9a9f93b0fb022fba2cee7d82f98df095131205d7ecf7e",
+    "src/mission/config/avoidance.yaml": "2ebdc63ff6018ff6f294c4f8bbd710c893353a986be7f646b1135eda5eadc37a",
+    "src/mission/config/mid360_scan.yaml": "d3e8f7cbc722711a4f8918248ce273bfbc2787032bbd00a5cf5807c2e4f81e62"
+  }
+}

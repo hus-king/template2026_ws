@@ -33,8 +33,8 @@
 
 using namespace std;
 
-#define ALTITUDE 1.4f
-#define AIM_ALTITUDE 1.4f
+#define ALTITUDE 0.8f
+#define AIM_ALTITUDE 0.8f
 #define AIM_CATAPULT_ALTITUDE 0.65f
 #define AIM_RED_ALTITUDE 0.25f
 

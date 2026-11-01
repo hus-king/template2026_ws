@@ -1,5 +1,5 @@
 # 目标位置 [m]，使用本地 ENU 坐标
-target_x: 1.0
+target_x: 2.5
 target_y: 0.0
 
 # 避障外圈、内圈半径 [m]
