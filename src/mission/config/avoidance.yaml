@@ -23,4 +23,4 @@ range_min: 0
 range_max: 359
 
 # 1: 自动切换 OFFBOARD；0: 等待遥控器切换，与 hover/square 配置一致
-if_debug: 1
+if_debug: 0
