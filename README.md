@@ -138,119 +138,41 @@ waypoints:
 
 本文按当前源码和配置编写。已对 square 的参数对应关系及 square、avoidance 的 launch/YAML 做静态检查；尚未进行 ROS 编译、仿真或实机飞行验证。
 
-## 仿真启动（新增）
+## 仿真启动脚本
 
-本版已修复上文列出的依赖、launch 和避障编译问题，并完成空场仿真运行；降落后确认上锁仍未通过，障碍绕行未测。
+在镜像环境中编译一次 `catkin_make -j2`，之后直接启动（默认 hover）：
 
-电脑需已安装 Ubuntu 20.04、ROS Noetic、Gazebo 11、MAVROS、tmux，并编译好 PX4 SITL 和 Gazebo Classic 插件。
-
-```bash
-git clone https://github.com/hus-king/template2026_ws.git ~/template2026_ws
-cd ~/template2026_ws
-source /opt/ros/noetic/setup.bash
-rosdep install --from-paths src --ignore-src -r -y
-catkin_make -j4
-cp tools/local.env.example tools/local.env
+```zsh
+./shell/sim.sh
+# 四点巡航：./shell/sim.sh square
+# 雷达避障：./shell/sim.sh avoidance
 ```
 
-修改 `tools/local.env` 中的 `PX4_ROOT`，填自己的 PX4 目录，然后在电脑的图形桌面终端启动：
+脚本打开仿真、检查和任务窗口，数据就绪后自动运行仿真任务。镜像负责 ROS、PX4、Gazebo 和工作空间环境，不需要手动 source。
 
-```bash
-bash tools/start_sim.sh --gui
-bash tools/run_task.sh hover
+## 实机启动脚本
+
+```zsh
+./shell/hardware.sh
+# 四点巡航：./shell/hardware.sh square
+# 雷达避障：./shell/hardware.sh avoidance
 ```
 
-输入 `1` 开始。`hover` 可换成 `square`（四点巡航）或 `avoidance`（空场目标追踪）。每次换任务前先重启仿真：
+先启动飞控连接、雷达和定位。避障额外启动点云转扫描。任务窗口仅填入命令，由操作者按回车，再输入 `1` 确认；手动切 OFFBOARD 后程序会请求解锁。
 
-```bash
-bash tools/stop_sim.sh
-bash tools/start_sim.sh --gui
-bash tools/run_task.sh square
-```
+`Ctrl+B`、`W` 切换窗口，`Ctrl+B`、`D` 离开画面并保留程序；在各运行窗口按 `Ctrl+C` 停止程序。
 
-停止：`bash tools/stop_sim.sh`。无图形界面时将 `--gui` 换成 `--headless`。
+## 需要改的参数
 
-## 哪里需要改（新增）
-
-| 文件 | 修改内容 |
+| 位置 | 参数 |
 | --- | --- |
-| `tools/local.env` | `PX4_ROOT`：本机 PX4 目录；构建目录不同时设置 `PX4_BUILD_DIR` |
-| `src/mission/config/hover.yaml` | 到点误差 `err_max`、自动 OFFBOARD 开关 `if_debug` |
-| `src/mission/config/square.yaml` | 高度 `altitude`、四个航点 `waypoints` |
-| `src/mission/config/avoidance.yaml` | 目标 `target_x/target_y`、避障半径和速度 |
-| `src/template/include/template.h` | hover/avoidance 高度 `ALTITUDE` |
+| `shell/sim.sh` | `PX4_ROOT`、`PX4_BUILD_DIR`：PX4 和构建目录；`GUI`：图形界面 |
+| `shell/hardware.sh` | `roslaunch fly_demo utils.launch`：替换为当前飞机的驱动、定位启动命令 |
+| `src/mission/config/hover.yaml` | 到点误差 `err_max` |
+| `src/mission/config/square.yaml` | 高度 `altitude`、航点 `waypoints` |
+| `src/mission/config/avoidance.yaml` | 目标 `target_x/target_y`、避障半径、速度 |
+| `src/mission/config/mid360_scan.yaml` | 点云高度过滤、距离范围 |
+| `src/template/include/template.h` | hover/avoidance 高度 `ALTITUDE`、`AIM_ALTITUDE` |
 | `src/mission/src/hover.cpp` | 悬停时间 `hover(30.0)` |
 
-修改 YAML 后重启任务；修改 C++/头文件后重新 `catkin_make -j4`。工作空间路径自动识别。
-
-PX4 已验证提交：`79c55614d860d2f3e8ce775741dd96ef062c998f`；其他版本未验证。远程桌面需要 VirtualGL 时，在 `tools/local.env` 中设置 `GAZEBO_GUI_PREFIX="vglrun -d egl0 -fps 30"`。
-
-## 实机版（新增）
-
-版本：`hardware-2026-11-01`。当前实机源码与参数已归档；已完成编译检查、隔离假反馈任务测试和真实点云转扫描验证，尚未完成实飞/绕障验收，降落确认上锁问题仍保留。
-
-### 启动
-
-实机需已有 MAVROS、Livox 驱动、FAST-LIO 和 `fly_demo/utils.launch`；点云转换需 `pointcloud_to_laserscan`。
-
-终端 1：
-
-```bash
-cd ~/template2026_ws
-source tools/env_hardware.sh
-roslaunch fly_demo utils.launch
-```
-
-终端 2（avoidance 需要）：
-
-```bash
-cd ~/template2026_ws
-source tools/env_hardware.sh
-roslaunch mission mid360_scan.launch cloud_topic:=/cloud_registered
-```
-
-终端 3：
-
-```bash
-cd ~/template2026_ws
-bash tools/run_hardware.sh hover
-# 换任务时使用 square 或 avoidance
-```
-
-输入 `1` 启动任务，默认手动切 OFFBOARD；切入后程序会请求解锁。实机入口使用 ROS 端口 `11311`，不会启动 PX4 SITL、Gazebo 或仿真真值定位。
-
-### 当前参数与修改位置
-
-| 文件 | 当前参数 |
-| --- | --- |
-| `src/template/include/template.h` | `ALTITUDE=0.8f`、`AIM_ALTITUDE=0.8f`，用于 hover/avoidance 等公共函数 |
-| `src/mission/config/square.yaml` | 高度 `0.8 m`；航点 `(0,0) → (0.5,0) → (0.5,0.5) → (0,0.5)` |
-| `src/mission/config/avoidance.yaml` | 目标本地坐标 `(2.5,0)`；外圈 `1.6 m`、内圈 `0.8 m` |
-| `src/mission/config/mid360_scan.yaml` | 转到 `body` 坐标系，720 点；高度筛选 `[-0.15,0.30] m` |
-| `src/mission/launch/hardware.launch` | 实机入口覆盖 `if_debug=0`，不受任务 YAML 中 `if_debug=1` 影响 |
-| `tools/env_hardware.sh` | ROS 环境和本机已有驱动工作空间路径 |
-
-修改 YAML 后重启任务；修改头文件或 C++ 后，先停止任务，再执行 `source /opt/ros/noetic/setup.bash && catkin_make -j2`。
-
-归档时发现现有可执行文件早于本次高度修改，因此当前进程不会自动采用 `0.8 m`。本次只保存版本，没有重编译或重启运行中的程序。隔离测试结果对应当时的二进制，参数改动后尚未重新完成任务测试。版本参数见 [HARDWARE_VERSION.json](HARDWARE_VERSION.json)。
-
-## 实机 shell 启动（新增）
-
-```bash
-cd ~/template2026_ws
-bash tools/start_hardware.sh hover
-# 四点巡航：bash tools/start_hardware.sh square
-# 雷达避障：bash tools/start_hardware.sh avoidance
-```
-
-脚本打开 tmux 的 `sensors`、`task` 窗口；avoidance 缺少 `/scan` 时还会打开 `scan` 窗口。已有驱动/定位或扫描时复用，已有任务时拒绝重复启动。
-
-任务命令预填在 `task` 窗口，**由操作者按回车执行，再输入 `1` 确认**，仍需手动切 OFFBOARD。
-
-`Ctrl+B` 然后按 `D` 退出画面但保留程序；重新进入：
-
-```bash
-tmux attach -t template2026_hardware
-```
-
-`Ctrl+B` 然后按 `W` 选择窗口；在对应窗口按 `Ctrl+C` 停止程序。启动命令后加 `--no-attach` 可只创建窗口。
+修改 YAML 后重启任务；修改 C++ 或头文件后重新编译。

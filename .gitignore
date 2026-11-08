@@ -8,10 +8,8 @@ devel/
 .Trash-1000/
 .vscode/
 
-# Runtime evidence stays on the server; compact summaries live under docs/.
 /validation/
 /install/
 __pycache__/
 *.py[cod]
 
-/tools/local.env
