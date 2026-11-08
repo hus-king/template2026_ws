@@ -150,24 +150,11 @@ waypoints:
 
 脚本打开仿真、检查和任务窗口，数据就绪后自动运行仿真任务。镜像负责 ROS、PX4、Gazebo 和工作空间环境，不需要手动 source。
 
-## 实机启动脚本
-
-```zsh
-./shell/hardware.sh
-# 四点巡航：./shell/hardware.sh square
-# 雷达避障：./shell/hardware.sh avoidance
-```
-
-先启动飞控连接、雷达和定位。避障额外启动点云转扫描。任务窗口仅填入命令，由操作者按回车，再输入 `1` 确认；手动切 OFFBOARD 后程序会请求解锁。
-
-`Ctrl+B`、`W` 切换窗口，`Ctrl+B`、`D` 离开画面并保留程序；在各运行窗口按 `Ctrl+C` 停止程序。
-
 ## 需要改的参数
 
 | 位置 | 参数 |
 | --- | --- |
 | `shell/sim.sh` | `PX4_ROOT`、`PX4_BUILD_DIR`：PX4 和构建目录；`GUI`：图形界面 |
-| `shell/hardware.sh` | `roslaunch fly_demo utils.launch`：替换为当前飞机的驱动、定位启动命令 |
 | `src/mission/config/hover.yaml` | 到点误差 `err_max` |
 | `src/mission/config/square.yaml` | 高度 `altitude`、航点 `waypoints` |
 | `src/mission/config/avoidance.yaml` | 目标 `target_x/target_y`、避障半径、速度 |
