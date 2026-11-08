@@ -29,5 +29,4 @@ add_executable(avoidance src/avoidance.cpp)
 target_link_libraries(avoidance ${catkin_LIBRARIES})
 add_dependencies(avoidance ${catkin_EXPORTED_TARGETS})
 
-catkin_install_python(PROGRAMS scripts/sim_vision_truth.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+

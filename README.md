@@ -138,18 +138,6 @@ waypoints:
 
 本文按当前源码和配置编写。已对 square 的参数对应关系及 square、avoidance 的 launch/YAML 做静态检查；尚未进行 ROS 编译、仿真或实机飞行验证。
 
-## 仿真启动脚本
-
-在镜像环境中编译一次 `catkin_make -j2`，之后直接启动（默认 hover）：
-
-```zsh
-./shell/sim.sh
-# 四点巡航：./shell/sim.sh square
-# 雷达避障：./shell/sim.sh avoidance
-```
-
-脚本打开仿真、检查和任务窗口，数据就绪后自动运行仿真任务。镜像负责 ROS、PX4、Gazebo 和工作空间环境，不需要手动 source。
-
 ## 实机启动脚本
 
 ```zsh
@@ -166,7 +154,6 @@ waypoints:
 
 | 位置 | 参数 |
 | --- | --- |
-| `shell/sim.sh` | `PX4_ROOT`、`PX4_BUILD_DIR`：PX4 和构建目录；`GUI`：图形界面 |
 | `shell/hardware.sh` | `roslaunch fly_demo utils.launch`：替换为当前飞机的驱动、定位启动命令 |
 | `src/mission/config/hover.yaml` | 到点误差 `err_max` |
 | `src/mission/config/square.yaml` | 高度 `altitude`、航点 `waypoints` |
