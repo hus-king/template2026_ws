@@ -14,7 +14,7 @@ tmux send-keys -t ros_session:main_nodes.1 'sleep 3; roslaunch fly_demo utils.la
 
 # Pane 2：square 任务，程序提示后由操作者输入 1。
 tmux split-window -h -t ros_session:main_nodes.1 zsh
-tmux send-keys -t ros_session:main_nodes.2 'sleep 8; roslaunch mission square.launch' C-m
+tmux send-keys -t ros_session:main_nodes.2 'sleep 8; source ~/template2026_ws/devel/setup.zsh --extend; roslaunch mission square.launch' C-m
 
 # 整理分屏并打开会话。
 tmux select-layout -t ros_session:main_nodes tiled
